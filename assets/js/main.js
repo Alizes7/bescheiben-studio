@@ -100,6 +100,12 @@ editorEl.addEventListener('change', function (e) {
   if (key && e.target.type === 'checkbox') updateField(key, e.target.checked);
 });
 editorEl.addEventListener('click', function (e) {
+  var themeBtn = e.target.closest('[data-theme-opt]');
+  if (themeBtn) {
+    e.preventDefault();
+    changeTheme(themeBtn.dataset.themeOpt);
+    return;
+  }
   var t = e.target.closest('[data-type-opt]');
   if (t) changeType(t.dataset.typeOpt);
 });
