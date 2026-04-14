@@ -2,6 +2,26 @@
 
 // ── HELPERS ───────────────────────────────────────────
 
+// Parser para tamanhos individuais de palavras
+// **texto** = xx-large (muito grande)
+// *texto* = x-large (grande) 
+// ^texto^ = medium (médio)
+function parseTextWithSizes(text) {
+  if (!text) return '';
+  let parsed = escHtml(text);
+
+  // **texto** → xx-large + purple
+  parsed = parsed.replace(/\*\*(.*?)\*\*/g, '<span class="text-xxlarge text-purple">$1</span>');
+
+  // *texto* → x-large + white bold
+  parsed = parsed.replace(/\*(.*?)\*/g, '<span class="text-xlarge text-white">$1</span>');
+
+  // ^texto^ → medium
+  parsed = parsed.replace(/\^(.*?)\^/g, '<span class="text-medium">$1</span>');
+
+  return parsed;
+}
+
 function escHtml(s) {
   return String(s || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -95,7 +115,7 @@ function buildCover(s, idx, total) {
       /* main */
       '<div class="dk-cover-body">' +
         '<div class="dk-tag">' + escHtml(s.tag || 'BESCHEIBEN') + '</div>' +
-        '<h1 class="dk-cover-headline">' + highlight(s.headline, s.headlineHighlight) + '</h1>' +
+        '<h1 class="dk-cover-headline">' + parseTextWithSizes(s.headline) + '</h1>' +
         (s.sub ? '<p class="dk-cover-sub">' + escHtml(s.sub) + '</p>' : '') +
       '</div>' +
 
@@ -131,7 +151,7 @@ function buildContent(s, idx, total) {
           '<div class="dk-step-badge">' + escHtml(s.step || 'CONTEÚDO') + '</div>' +
           '<div class="dk-step-line" aria-hidden="true"></div>' +
         '</div>' +
-        '<h2 class="dk-content-headline">' + highlight(s.headline, s.headlineHighlight) + '</h2>' +
+        '<h2 class="dk-content-headline">' + parseTextWithSizes(s.headline) + '</h2>' +
         '<p class="dk-content-text">' + escHtml(s.body || '') + '</p>' +
       '</div>' +
 
@@ -167,7 +187,7 @@ function buildQuote(s, idx, total) {
           : '') +
         '<div class="dk-quote-main-wrap">' +
           '<div class="dk-quote-bar" aria-hidden="true"></div>' +
-          '<h2 class="dk-quote-main">' + highlight(s.author || '', s.quoteHighlight) + '</h2>' +
+          '<h2 class="dk-quote-main">' + parseTextWithSizes(s.author) + '</h2>' +
         '</div>' +
       '</div>' +
 
@@ -212,7 +232,7 @@ function buildCta(s, idx, total) {
       /* body */
       '<div class="dk-cta-body">' +
         '<div class="dk-cta-tag">' + escHtml(s.eyebrow || 'PRÓXIMO PASSO') + '</div>' +
-        '<h2 class="dk-cta-headline">' + highlight(s.headline, s.headlineHighlight) + '</h2>' +
+        '<h2 class="dk-cta-headline">' + parseTextWithSizes(s.headline) + '</h2>' +
         '<div class="dk-cta-btn">' +
           escHtml(s.cta || 'Falar com a Bescheiben') +
           '<svg class="dk-btn-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">' +

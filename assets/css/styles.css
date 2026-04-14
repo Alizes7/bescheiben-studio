@@ -289,3 +289,64 @@ textarea { min-height:72px; line-height:1.5; }
 .dk-ig-item { font-family:'DM Sans',sans-serif; font-size:calc(9px * var(--font-scale,1)); font-weight:600; color:rgba(255,255,255,.35); white-space:nowrap; }
 
 @media(max-width:1100px){ .app{grid-template-columns:260px 1fr 280px;} }
+
+/* ── TAMANHOS INDIVIDUAIS DE PALAVRAS ───────────────── */
+.text-normal { font-size: 1em; }
+.text-medium { font-size: 1.15em; font-weight: 600; }
+.text-large { font-size: 1.35em; font-weight: 700; }
+.text-xlarge { font-size: 1.6em; font-weight: 800; }
+.text-xxlarge { font-size: 2em; font-weight: 800; line-height: 1.1; }
+
+/* Destaque especial roxo para palavras grandes */
+.text-purple { color: var(--dk-violet, #a688fd); }
+.text-white { color: #ffffff; }
+
+/* Ajustes específicos por tipo de slide */
+.dk-cover-headline .text-xxlarge { 
+  display: inline-block; 
+  margin: 0.1em 0;
+  text-shadow: 0 0 30px rgba(124,92,252,0.3);
+}
+.dk-content-headline .text-xlarge {
+  display: inline-block;
+  margin: 0.05em 0;
+}
+.dk-quote-main .text-xxlarge {
+  display: inline-block;
+  line-height: 1.05;
+}
+
+/* Novos templates - variações de layout */
+.dk-minimal .dk-cover-headline {
+  font-size: calc(46px * var(--font-scale,1));
+  letter-spacing: -0.02em;
+}
+.dk-numbers .dk-big-number {
+  font-family: 'Syne', sans-serif;
+  font-size: calc(72px * var(--font-scale,1));
+  font-weight: 800;
+  color: var(--dk-violet);
+  line-height: 1;
+  display: block;
+  margin-bottom: 0.2em;
+}
+.dk-checklist .dk-check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: calc(15px * var(--font-scale,1));
+}
+.dk-checklist .dk-check-box {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--dk-violet);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dk-checklist .dk-check-box.checked {
+  background: var(--dk-violet);
+}
