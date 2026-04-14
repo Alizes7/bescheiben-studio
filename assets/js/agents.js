@@ -34,8 +34,6 @@ var SYSTEM_IDEAS =
   '}\n' +
   'Crie entre 4 e 6 slides. Tom: direto, premium, B2B. Nunca use clichês de IA.';
 
-// ── AGENT TABS ────────────────────────────────────────
-
 function switchAgent(name) {
   var tabs  = document.querySelectorAll('.agent-tab');
   var panes = document.querySelectorAll('.agent-pane');
@@ -55,8 +53,6 @@ function quickPrompt(agentId, promptIdx) {
   document.getElementById(agentId + 'Input').value = text;
   sendAgent(agentId);
 }
-
-// ── SEND ──────────────────────────────────────────────
 
 async function sendAgent(agentId) {
   var inputEl    = document.getElementById(agentId + 'Input');
@@ -96,7 +92,15 @@ async function sendAgent(agentId) {
     loadMsg.remove();
 
     if (!res.ok) {
-      appendError(messagesEl, getMsgErro(res.status, data));
+      var errorMsg = (data && data.error) || 'Erro desconhecido';
+      
+      // Se for erro de sobrecarga, mostra mensagem especial com botão de retry
+      if (res.status === 503 || errorMsg.includes('sobrecarregada') || errorMsg.includes('high demand')) {
+        appendErrorWithRetry(messagesEl, '⚠️ A IA está sobrecarregada (muita gente usando). Tente novamente em alguns segundos ou use um template pronto abaixo:', agentId, userText);
+      } else {
+        appendError(messagesEl, errorMsg);
+      }
+      
       sendBtn.disabled = false;
       messagesEl.scrollTop = messagesEl.scrollHeight;
       return;
@@ -109,7 +113,7 @@ async function sendAgent(agentId) {
       return;
     }
 
-    // ── IDEIAS: tenta parsear JSON e carregar slides direto
+    // IDEIAS: tenta parsear JSON
     if (agentId === 'ideas') {
       var parsed = tryParseSlides(reply);
       if (parsed && parsed.length > 0) {
@@ -120,7 +124,7 @@ async function sendAgent(agentId) {
       }
     }
 
-    // ── STORY: resultado de texto com botão de aplicar
+    // STORY: resultado de texto
     var aiMsg = document.createElement('div');
     aiMsg.className = 'msg ai';
     aiMsg.innerHTML =
@@ -142,14 +146,33 @@ async function sendAgent(agentId) {
 
   } catch (err) {
     loadMsg.remove();
-    appendError(messagesEl, 'Sem conexão com o servidor. Verifique sua internet.');
+    appendErrorWithRetry(messagesEl, '⚠️ Sem conexão com o servidor. Verifique sua internet ou tente novamente:', agentId, userText);
   }
 
   sendBtn.disabled = false;
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// ── IDEAS: render rich result + load button ───────────
+// NOVO: Erro com botão de tentar novamente
+function appendErrorWithRetry(container, text, agentId, originalPrompt) {
+  var d = document.createElement('div');
+  d.className = 'msg ai error-msg';
+  d.innerHTML = '<div style="margin-bottom:8px;">' + text + '</div>';
+  
+  var retryBtn = document.createElement('button');
+  retryBtn.className = 'use-result-btn';
+  retryBtn.style.background = 'rgba(124,92,252,0.2)';
+  retryBtn.type = 'button';
+  retryBtn.textContent = '🔄 Tentar novamente';
+  retryBtn.addEventListener('click', function() {
+    // Reenvia automaticamente
+    document.getElementById(agentId + 'Input').value = originalPrompt;
+    sendAgent(agentId);
+  });
+  
+  d.appendChild(retryBtn);
+  container.appendChild(d);
+}
 
 function renderIdeasResult(messagesEl, parsedSlides, rawText) {
   var aiMsg = document.createElement('div');
@@ -202,10 +225,8 @@ function tryParseSlides(text) {
   return null;
 }
 
-// ── STORY: apply text to slides ───────────────────────
-
 function applyStoryToSlides(text) {
-  var matches = Array.from(text.matchAll(/\[SLIDE\s*\d+[^\]]*\][^\[]*/gi));
+  var matches = Array.from(text.matchAll(/\[SLIDE\s*[^\]]*\][^\[]*/gi));
   if (!matches.length) {
     alert('Não encontrei estrutura de slides. Use os textos manualmente.');
     return;
@@ -221,16 +242,6 @@ function applyStoryToSlides(text) {
   });
   selectSlide(0);
   alert(matches.length + ' slides atualizados!');
-}
-
-// ── HELPERS ───────────────────────────────────────────
-
-function getMsgErro(status, data) {
-  var srv = data && data.error;
-  if (status === 429) return '⏳ Limite de requisições. Aguarde e tente novamente.';
-  if (status === 500) return '⚠️ ' + (srv || 'Erro interno. Verifique GEMINI_API_KEY no Vercel.');
-  if (status === 400 || status === 403) return '🔑 Chave de API inválida. Verifique GEMINI_API_KEY.';
-  return srv || '⚠️ Algo deu errado (status ' + status + ').';
 }
 
 function appendError(container, text) {
